@@ -1,0 +1,36 @@
+services:
+  jira:
+    image: atlassian/jira-software:9.17.5
+    container_name: jirasoftware
+    networks:
+      - jira
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /etc/timezone:/etc/timezone      
+      - ./jira-var:/var/atlassian/application-data/jira
+      #- ./jira-opt/server.xml:/opt/atlassian/jira/conf/server.xml:ro #uncomment row for using domain name in ./jira-opt/server.xml
+    ports:
+      - '8080:8080'
+    environment:
+      - 'CATALINA_OPTS= -Xms512m -Xmx4g -Dupm.plugin.upload.enabled=true'
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15.8
+    networks:
+      - jira
+    container_name: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./postgresqldata:/var/lib/postgresql/data
+    environment:
+      - 'POSTGRES_USER=jiradbuser'
+      - 'POSTGRES_PASSWORD=passwd'
+      - 'POSTGRES_DB=jiradb'
+      - 'POSTGRES_ENCODING=UTF8'
+      - 'POSTGRES_COLLATE=C'
+      - 'POSTGRES_COLLATE_TYPE=C'
+networks:
+  jira:
